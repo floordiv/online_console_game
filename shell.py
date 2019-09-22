@@ -58,6 +58,8 @@ def single_player():
     try:
         while True:
             # sleep(sleep_time)
+            core.clear_area()
+            core.draw_table()
             pressed_key = getch(timeout=0.2)
             if pressed_key in keys_table:
                 core.player.edit_y_pos(0, keys_table[pressed_key][0])
@@ -118,7 +120,9 @@ def menu(text, options, show_hint=True):      # dict with codes
 
 if __name__ == '__main__':
     try:
-        menu('Choose game mode:', {'Singleplayer': single_player, 'Multiplayer': multi_player}, show_hint=True)()
+        chose = menu('Choose game mode:', {'Singleplayer': single_player, 'Multiplayer': multi_player}, show_hint=True)
+        print('Starting the game. Please, wait...')
+        chose()
     except Exception:
         pass
 
