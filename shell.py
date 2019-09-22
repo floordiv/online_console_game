@@ -2,10 +2,12 @@ import select
 import sys
 import termios
 import tty
+from time import sleep
 
 import core
 
 # moves = [[0, -1], [0, -1], [0, -1], [0, -1], [0, -1], [0, -1], [0, -1], [0, -1], [0, -1], [0, -1], [1, 1], [0, -1], [0, -1], [0, -1], [0, -1], [0, -1], [0, -1], [0, -1]]
+sleep_time = 0.1
 
 core.clear_area()
 core.load_map('default_map')
@@ -51,12 +53,72 @@ keys_table = {
     'd': [0, 1]
 }
 
-while True:
-    pressed_key = getch(timeout=0.2)
-    if pressed_key in keys_table:
-        core.player.edit_y_pos(0, keys_table[pressed_key][0])
-        core.player.edit_x_pos(0, keys_table[pressed_key][1])
-        core.update_player()
-        core.clear_area()
-        core.draw_table()
+
+def single_player():
+    try:
+        while True:
+            # sleep(sleep_time)
+            pressed_key = getch(timeout=0.2)
+            if pressed_key in keys_table:
+                core.player.edit_y_pos(0, keys_table[pressed_key][0])
+                core.player.edit_x_pos(0, keys_table[pressed_key][1])
+                core.update_player()
+                core.clear_area()
+                core.draw_table()
+    except KeyboardInterrupt:
+        menu('You sure you want to exit?', {'Yes': exit_from_game, 'No': single_player}, show_hint=True)()
+
+
+def multi_player():
+    print('Sorry, this function is unavailable now')
+
+
+def exit_from_game():
+    print('Okay :( Bye, my friend')
+    raise Exception
+
+
+def _draw_menu(text, options, active_option):
+    index = 0
+    print(text)
+    for option in options:
+        print('> ' + option if index == active_option else option)
+        index += 1
+
+
+def menu(text, options, show_hint=True):      # dict with codes
+    core.clear_area()
+    active_option = 0
+    chose = False
+    keys = {
+        'w': -1,
+        's': 1
+    }
+    if show_hint:
+        text = 'Hint: w and s to scroll, f to choose\n' + text
+    _draw_menu(text, options, active_option)
+    while not chose:
+        pressed_key = getch()
+        if pressed_key in ['w', 's']:
+            active_option += keys[pressed_key]
+            try:
+                list(options)[active_option]
+            except IndexError:
+                active_option += -keys[pressed_key]
+            finally:
+                if active_option < 0:
+                    active_option = 0
+            core.clear_area()
+            _draw_menu(text, options, active_option)
+        elif pressed_key == 'f':
+            chose = True
+
+    return options[list(options)[active_option]]
+
+
+if __name__ == '__main__':
+    try:
+        menu('Choose game mode:', {'Singleplayer': single_player, 'Multiplayer': multi_player}, show_hint=True)()
+    except Exception:
+        pass
 
