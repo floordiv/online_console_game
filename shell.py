@@ -56,6 +56,7 @@ def single_player():
         while True:
             # sleep(sleep_time)
             core.clear_area()
+            core.update_player()
             core.draw_table()
             pressed_key = getch(timeout=0.2)
             if pressed_key in keys_table:
@@ -70,6 +71,7 @@ def single_player():
 
 def multi_player():
     input('Sorry, this function is unavailable now. Press Enter to continue')
+    entry_point()
 
 
 def exit_from_game():
@@ -116,8 +118,10 @@ def menu(text, options, show_hint=True):      # dict with codes
 
 def entry_point():
     try:
-        chose = menu('Choose game mode:', {'Singleplayer': single_player, 'Multiplayer': multi_player}, show_hint=True)
-        print('Starting the game. Please, wait...')
+        chose = menu('Choose game mode:', {'Singleplayer': single_player, 'Multiplayer': multi_player, 'Exit': exit_from_game}, show_hint=True)
+        if chose == exit_from_game:
+            print('The game is closing...')
+            return
         chose()
     except Exception:
         pass
