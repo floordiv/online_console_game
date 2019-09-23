@@ -6,13 +6,10 @@ from time import sleep
 
 import core
 
-# moves = [[0, -1], [0, -1], [0, -1], [0, -1], [0, -1], [0, -1], [0, -1], [0, -1], [0, -1], [0, -1], [1, 1], [0, -1], [0, -1], [0, -1], [0, -1], [0, -1], [0, -1], [0, -1]]
 sleep_time = 0.1
 
 core.clear_area()
 core.load_map('default_map')
-core.update_player()
-core.draw_table()
 
 # for element in moves:
 #     # core.clear_area()
@@ -64,19 +61,18 @@ def single_player():
             if pressed_key in keys_table:
                 core.player.edit_y_pos(0, keys_table[pressed_key][0])
                 core.player.edit_x_pos(0, keys_table[pressed_key][1])
-                core.update_player()
+                # core.update_player()
                 core.clear_area()
                 core.draw_table()
     except KeyboardInterrupt:
-        menu('You sure you want to exit?', {'Yes': exit_from_game, 'No': single_player}, show_hint=True)()
+        menu('You sure you want to exit?', {'Back to menu': entry_point, 'Yes': exit_from_game, 'No': single_player}, show_hint=True)()
 
 
 def multi_player():
-    print('Sorry, this function is unavailable now')
+    input('Sorry, this function is unavailable now. Press Enter to continue')
 
 
 def exit_from_game():
-    print('Okay :( Bye, my friend')
     raise Exception
 
 
@@ -118,7 +114,7 @@ def menu(text, options, show_hint=True):      # dict with codes
     return options[list(options)[active_option]]
 
 
-if __name__ == '__main__':
+def entry_point():
     try:
         chose = menu('Choose game mode:', {'Singleplayer': single_player, 'Multiplayer': multi_player}, show_hint=True)
         print('Starting the game. Please, wait...')
@@ -126,3 +122,5 @@ if __name__ == '__main__':
     except Exception:
         pass
 
+
+entry_point()

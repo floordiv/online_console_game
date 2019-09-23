@@ -1,7 +1,8 @@
 import os
+import platform
 
 
-cls = 'clear'
+cls = 'cls' if platform.system().lower() == "windows" else 'clear'  # it's be work on mac, don't worry )))
 
 
 class area:
@@ -15,26 +16,43 @@ class area:
     collision_objects = [1, 2, 3, 4]
 
 
+class last_pos:
+    def edit_y(self, y):
+        if y in [1, -1]:
+            last_pos.__y += y
+
+    def edit_x(self, x):
+        if x in [1, -1]:
+            last_pos.__x += x
+
+    def get_y(self):
+        return last_pos.__y
+
+    def get_x(self):
+        return last_pos.__x
+
+    __y = 10
+    __x = 29
+
+
 class player:
     def edit_x_pos(self, x):
         if area.content[player.__current_y][player.__current_x + x] != 0:
             return 'collision'
         if x in [1, -1]:
-            var.last_player_actions['x'] = player.__current_x
+            last_pos.edit_x(0, player.__current_x)
             area.content[player.__current_y][player.__current_x] = 0
             player.__current_x += x
-            return True
-        return False
+            update_player()
 
     def edit_y_pos(self, y):
         if area.content[player.__current_y + y][player.__current_x] != 0:
             return 'collision'
         if y in [1, -1]:
-            var.last_player_actions['y'] = player.__current_y
+            last_pos.edit_y(0, player.__current_y)
             area.content[player.__current_y][player.__current_x] = 0
             player.__current_y += y
-            return True
-        return False
+            update_player()
 
     def get_y(self):
         return player.__current_y
@@ -50,7 +68,6 @@ class player:
 
 class var:
     actions = []
-    last_player_actions = {'y': 0, 'x': 0}
 
 
 symbols_table = {
@@ -65,26 +82,21 @@ symbols_table = {
 }
 reversed_symbols_table = dict(zip(symbols_table.values(), symbols_table.keys()))
 
-area_height = 17
-area_weight = 33
-area_data = []
-
 
 def clear_area():
     os.system(cls)
 
 
 def return_player_to_last_coord():
-    player.edit_y_pos(0, var.last_player_actions['y'])
-    player.edit_x_pos(0, var.last_player_actions['x'])
-    area.content[var.last_player_actions['y']][var.last_player_actions['x']] = 0
+    player.edit_y_pos(0, last_pos.get_y(0))
+    player.edit_x_pos(0, last_pos.get_x(0))
+    area.content[last_pos.get_y(0)][last_pos.get_x(0)] = 0
 
 
 def load_map(name):
     with open(name, 'r') as map_file:
         map_file = map_file.readlines()
         area_info = map_file[0].strip('\n').split('.')
-        # area_info = area_file[0].split('.')
         area_content = map_file[1:]
 
     index = 1
@@ -115,5 +127,3 @@ def draw_table():
             except KeyError:
                 pass
         print(current_line)
-
-# collision
