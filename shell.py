@@ -2,23 +2,13 @@ import select
 import sys
 import termios
 import tty
-from time import sleep
-
 import core
+import textengine
 
-sleep_time = 0.1
 
-core.clear_area()
-core.load_map('default_map')
+version = '0.0.1'
 
-# for element in moves:
-#     # core.clear_area()
-#     print(element[0])
-#     core.player.edit_y_pos(0, element[0])
-#     core.player.edit_x_pos(0, element[1])
-#     core.update_player()
-#     core.draw_table()
-#     sleep(sleep_time)
+textengine.clear_area()
 
 
 # This two functions are copied from StackOverflow
@@ -54,7 +44,6 @@ keys_table = {
 def single_player():
     try:
         while True:
-            # sleep(sleep_time)
             core.clear_area()
             core.update_player()
             core.draw_table()
@@ -62,8 +51,7 @@ def single_player():
             if pressed_key in keys_table:
                 core.player.edit_y_pos(0, keys_table[pressed_key][0])
                 core.player.edit_x_pos(0, keys_table[pressed_key][1])
-                # core.update_player()
-                core.clear_area()
+                textengine.clear_area()
                 core.draw_table()
     except KeyboardInterrupt:
         menu('You sure you want to exit?', {'Back to menu': entry_point, 'Yes': exit_from_game, 'No': single_player}, show_hint=True)()

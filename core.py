@@ -1,6 +1,10 @@
-import os
+import textengine as txt
+import physicengine as physic
 import platform
+import os
 
+
+version = '0.0.1'
 
 cls = 'cls' if platform.system().lower() == "windows" else 'clear'  # it's be work on mac, don't worry )))
 
@@ -13,7 +17,7 @@ class area:
     height = 17
     width = 33
     content = []
-    collision_objects = [1, 2, 3, 4]
+    info = {'name': '', 'description': ''}
 
 
 class last_pos:
@@ -70,21 +74,69 @@ class var:
     actions = []
 
 
-symbols_table = {
-    0: ' ',     # empty field
-    1: '|',     # vertical wall
-    2: '—',     # horizontal wall
-    3: '#',     # water
-    4: '@',     # tree
-    5: '>',     # higher place
-    6: '<',     # lower place
-    7: '☉'      # player
-}
-reversed_symbols_table = dict(zip(symbols_table.values(), symbols_table.keys()))
+class teleport:
+    @staticmethod
+    def player(to_pos):
+        if type(to_pos) == str:
+            to_pos = teleport.from_str_to_coords(to_pos)
+        pass
+
+    @staticmethod
+    def player_to_map(map_name, pos):
+        if type(pos) == str:
+            pos = teleport.from_str_to_coords(pos)
+        pass
+
+    @staticmethod
+    def object(to_pos):
+        if type(to_pos) == str:
+            to_pos = teleport.from_str_to_coords(to_pos)
+        pass
+
+    @staticmethod
+    def object_to_map(map_name, pos):
+        if type(pos) == str:
+            pos = teleport.from_str_to_coords(pos)
+        pass
+
+    @staticmethod
+    def from_str_to_coords(pos):
+        coords = pos.split('|')
+        return [coords[0], coords[1]]
 
 
-def clear_area():
-    os.system(cls)
+class trigger:
+    actions = {}
+    keys = {
+        'print': print,
+        'input': input,
+        'tp_player': teleport.player,
+        'tp_object': teleport.object
+    }
+
+    @staticmethod
+    def add(name, key, abs_pos):    # str, int, list
+        if name not in trigger.actions:
+            trigger.actions[name] = {'updates': [], 'trigger_abs_pos': abs_pos, 'map_object_before_trigger': area.content[abs_pos[0]][abs_pos[1]]}
+
+        area.content[abs_pos[0]][abs_pos[1]] = key
+
+    @staticmethod
+    def remove(name):
+        area.content[trigger.actions[name]['trigger_abs_pos'][0]][trigger.actions[name]['trigger_abs_pos'][1]] = trigger.actions[name]['map_object_before_trigger']
+
+    @staticmethod
+    def update(key, value):
+        if key in trigger.actions:
+            trigger.actions[key] = value
+
+    @staticmethod
+    def get_all_pos():
+        result = []
+        for element in trigger.actions:
+            result.append(trigger.actions[element]['trigger_abs_pos'])
+
+        return result
 
 
 def return_player_to_last_coord():
@@ -93,37 +145,49 @@ def return_player_to_last_coord():
     area.content[last_pos.get_y(0)][last_pos.get_x(0)] = 0
 
 
-def load_map(name):
-    with open(name, 'r') as map_file:
-        map_file = map_file.readlines()
-        area_info = map_file[0].strip('\n').split('.')
-        area_content = map_file[1:]
-
-    index = 1
-    for element in area_content:
-        current_line = [index]
-        for each in list(element.strip('\n')):
-            current_line.append(reversed_symbols_table[each])
-        area.content.append(current_line)
-        index += 1
-
-
 def update_player():
-    if area.content[player.get_y(0)][player.get_x(0)] in area.collision_objects:
-        return_player_to_last_coord()
+    if physic.iscollision([player.get_y(0), player.get_x(0)]):
+        # return_player_to_last_coord()
         return 'collision-object'
 
     area.content[player.get_y(0)][player.get_x(0)] = player.model_index
     return 'successful'
 
 
-def draw_table():
-    for element in area.content:
-        element = element[1:]
-        current_line = ''
-        for each in element:
-            try:
-                current_line += symbols_table[each]
-            except KeyError:
-                pass
-        print(current_line)
+def load_map(name):
+    if name in os.listdir('.'):
+        with open(name, 'r') as map_file:
+            map_file = map_file.readlines()
+            area_info = map_file[0].strip('\n').split('.')
+            area_content = map_file[1:]
+
+        index = 1
+        for element in area_content:
+            current_line = [index]
+            for each in list(element.strip('\n')):
+                current_line.append(txt.reversed_symbols_table[each])
+            area.content.append(current_line)
+            index += 1
+    else:
+        return 'map-not-found'
+
+
+def get_maps():
+    maps = []
+    valid_maps = []
+    for file in os.listdir('.'):
+        if file.endswith('.map'):
+            maps.append(file)
+
+    for element in maps:
+        with open(element, 'r') as map_file:
+            valid = True
+            for data in map_file.readlines()[0].split('.'):
+                for each in ['name', 'description', 'date_created', 'size']:
+                    if data.split('=')[0] != each:
+                        valid = False
+            if valid:
+                valid_maps.append(element)
+
+    return valid_maps
+
